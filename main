@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEAGUE VORTEX 2026</title>
+    <style>
+        :root {
+            --primary: #1a1a1a;
+            --accent: #ffd700;
+            --qualified: #006400; /* Vert foncé */
+            --eliminated: #8b0000; /* Rouge foncé */
+            --text: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--primary);
+            color: var(--text);
+            margin: 0;
+            text-align: center;
+        }
+
+        header {
+            padding: 20px;
+            background: linear-gradient(to bottom, #333, #000);
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .logo-container { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+        
+        nav { display: flex; justify-content: center; gap: 10px; padding: 10px; background: #222; position: sticky; top: 0; }
+        nav button { background: var(--accent); border: none; padding: 10px; cursor: pointer; font-weight: bold; }
+
+        .section { display: none; padding: 20px; }
+        .active { display: block; }
+
+        table { width: 90%; margin: auto; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #444; padding: 10px; }
+
+        .rank-top { background-color: var(--qualified) !important; }
+        .rank-bottom { background-color: var(--eliminated) !important; }
+
+        .login-box { max-width: 300 /px; margin: 100px auto; padding: 20px; border: 1px solid var(--accent); }
+        input { width: 80%; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+
+<div id="auth-page">
+    <div class="login-box">
+        <h2>LEAGUE VORTEX 2026</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Mot de passe" value="Vortex">
+        <br>
+        <button onclick="login()">ENTRER</button>
+    </div>
+</div>
+
+<div id="main-app" style="display:none;">
+    <header>
+        <div class="logo-container">LEAGUE VORTEX 2026</div>
+        <img src="votre_logo.png" alt="Logo" style="width:80px;">
+    </header>
+
+    <nav>
+        <button onclick="showSection('list')">Participants</button>
+        <button onclick="showSection('groups')">Groupes</button>
+        <button onclick="showSection('fixtures')">Calendrier</button>
+        <button onclick="showSection('standing')">Classement</button>
+    </nav>
+
+    <section id="list" class="section active">
+        <h2>Liste des Participants</h2>
+        <ul id="teams-list"></ul>
+    </section>
+
+    <section id="groups" class="section">
+        <h2>Tirage au Sort (Groupes)</h2>
+        <div id="groups-display"></div>
+    </section>
+
+    <section id="standing" class="section">
+        <h2>Classement Général</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Pos</th>
+                    <th>Équipe</th>
+                    <th>Pts</th>
+                    <th>J</th>
+                </tr>
+            </thead>
+            <tbody id="standing-table"></tbody>
+        </table>
+    </section>
+</div>
+
+<script>
+    const teams = [
+        "VORTEX - BEX-VONIZONGO", "VORTEX-Nandriana", "VORTEX-NIL YLEK", "VORTEX-GOLD", 
+        "VORTEX-LUCLUC", "VORTEX-BELOUH-B", "VORTEX-LUCKA", "VORTEX-1Mig", 
+        "VORTEX-Njr", "VORTEX-LIONEL", "VORTEX-TOJO", "VORTEX-FRANCKO", 
+        "VORTEX-ZANDRYLEK", "VORTEX-THUNDER", "VORTEX-SANE NIRINA", "VORTEX-NAGI", 
+        "VORTEX-DENIS", "VORTEX-LUNO", "VORTEX-TINO"
+    ];
+
+    let currentUser = "";
+    const adminEmail = "lyzarzou@gmail.com";
+
+    function login() {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('password').value;
+        
+        if(pass === "Vortex") {
+            currentUser = email;
+            document.getElementById('auth-page').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            initApp();
+        } else {
+            alert("Mot de passe incorrect");
+        }
+    }
+
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function initApp() {
+        // Afficher la liste
+        const listEl = document.getElementById('teams-list');
+        teams.forEach(t => listEl.innerHTML += `<li>${t}</li>`);
+
+        // Logique des groupes (19 participants)
+        const shuffled = [...teams].sort(() => 0.5 - Math.random());
+        const groupA = shuffled.slice(0, 5);
+        const groupB = shuffled.slice(5, 10);
+        const groupC = shuffled.slice(10, 15);
+        const groupD = shuffled.slice(15, 19); // Le groupe D a 4 joueurs
+
+        displayGroup("Groupe A", groupA);
+        displayGroup("Groupe B", groupB);
+        displayGroup("Groupe C", groupC);
+        displayGroup("Groupe D", groupD);
+
+        // Simulation Classement (exemple)
+        const standingTable = document.getElementById('standing-table');
+        teams.forEach((t, index) => {
+            const isQualified = index < 16;
+            const rowClass = isQualified ? 'rank-top' : 'rank-bottom';
+            standingTable.innerHTML += `
+                <tr class="${rowClass}">
+                    <td>${index + 1}</td>
+                    <td>${t}</td>
+                    <td>${19 - index}</td> <td>0</td>
+                </tr>
+            `;
+        });
+    }
+
+    function displayGroup(name, members) {
+        const container = document.getElementById('groups-display');
+        let html = `<h3>${name}</h3><ul>`;
+        members.forEach(m => html += `<li>${m}</li>`);
+        html += `</ul>`;
+        container.innerHTML += html;
+    }
+</script>
+
+</body>
+</html>
